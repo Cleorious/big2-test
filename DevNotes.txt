@@ -1,0 +1,5 @@
+TODOS:
+
+Optimization
+-check the card back shader to only display sprites from front
+-atlas sprites to optimize draw calls
