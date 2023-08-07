@@ -3,3 +3,35 @@ TODOS:
 Optimization
 -check the card back shader to only display sprites from front
 -atlas sprites to optimize draw calls
+
+FEATURES
+GAME LOOP WITH FSM
+BOT AI 
+All common Big 2 rules are well implemented.
+
+Can choose a character at the beginning. Character avatars can change depending on
+the game condition during gameplay. For example, when winning the character is
+smiling, while when losing the character looks sad / angry.
+
+● 2D / 3D choice is purely optional. Priority is on the gameplay aspect of the game, not
+graphics quality. Using any 3rd party graphic & sound assets are OK.
+
+● As the game is 4 players, the other 3 players would be run by AI.
+
+● Can use any framework / plugins in Unity to ease the development process. But MUST
+NOT use any Big 2 game templates.
+
+Use of pooling for spawned objects.
+● Finite State Machine to control player state (e.g. start, running, die) and game state (e.g.
+ready, game run, game end).
+● Demonstrates usage of common Design Pattern (singleton, factory, observer,
+etc.).
+● Basic AI design.
+● Collision / colliders if necessary.
+● C# Event and Delegate usage inside the game. Or even better, show usage of UniRX /
+Reactive programming.
+● Correct usage of coroutine.
+● Dependency Injection / Entity Component System implementation.
+● Usage of UI framework (Unity UI or other framework is OK).
+● Git as source control.
+● Assets and performance optimization.

@@ -1,0 +1,102 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: UIAtlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 3
+      m_BuildTarget: Android
+      m_MaxTextureSize: 2048
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: 48
+      m_TextureCompression: 1
+      m_CompressionQuality: 50
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 1
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 1
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: 30811236e6bc447cc872112963978b35, type: 3}
+    - {fileID: 102900000, guid: fc5d20a6b03a54870bd51704ed296edf, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: -5677292270611461809, guid: be1ece023c47e4be0a7db9988a23b21c, type: 3}
+  - {fileID: 6950932143392000648, guid: be1ece023c47e4be0a7db9988a23b21c, type: 3}
+  - {fileID: 2212054039884009860, guid: be1ece023c47e4be0a7db9988a23b21c, type: 3}
+  - {fileID: 251438401964042935, guid: be1ece023c47e4be0a7db9988a23b21c, type: 3}
+  - {fileID: 4571398405391936844, guid: be1ece023c47e4be0a7db9988a23b21c, type: 3}
+  - {fileID: 6946133512057975416, guid: be1ece023c47e4be0a7db9988a23b21c, type: 3}
+  - {fileID: 1170333934421242761, guid: be1ece023c47e4be0a7db9988a23b21c, type: 3}
+  - {fileID: -1397552516062443644, guid: be1ece023c47e4be0a7db9988a23b21c, type: 3}
+  - {fileID: 8983603952319993540, guid: be1ece023c47e4be0a7db9988a23b21c, type: 3}
+  - {fileID: -5403038139877838972, guid: be1ece023c47e4be0a7db9988a23b21c, type: 3}
+  - {fileID: -3867447001071113541, guid: be1ece023c47e4be0a7db9988a23b21c, type: 3}
+  - {fileID: 998712851837392302, guid: be1ece023c47e4be0a7db9988a23b21c, type: 3}
+  - {fileID: 7279435417395106641, guid: be1ece023c47e4be0a7db9988a23b21c, type: 3}
+  - {fileID: -1138777877145704308, guid: be1ece023c47e4be0a7db9988a23b21c, type: 3}
+  - {fileID: 6961040557206744526, guid: be1ece023c47e4be0a7db9988a23b21c, type: 3}
+  - {fileID: -5998776206419011385, guid: be1ece023c47e4be0a7db9988a23b21c, type: 3}
+  - {fileID: 21300000, guid: ccd2ed983b0ef4ccd8142ecaf5a25b20, type: 3}
+  - {fileID: 21300000, guid: f2e57bc838df94e5495941c62bfdbf8b, type: 3}
+  - {fileID: 21300000, guid: 58d64819085f24b919144e1b07c76f3e, type: 3}
+  - {fileID: 21300000, guid: 87c1b73cc6df742399aa972e85fa9984, type: 3}
+  - {fileID: 21300000, guid: 567eb6fd6844343d2b6a6a9f1f26b67d, type: 3}
+  - {fileID: 21300000, guid: d327ce9fb77964a6d8063e8e30d817b6, type: 3}
+  - {fileID: 21300000, guid: e748a3bfb3ebc4641a9923a64fa1d75b, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - Hero_01_Faceset_6
+  - Hero_01_Faceset_7
+  - Hero_01_Faceset_4
+  - Hero_01_Faceset_5
+  - Hero_01_Faceset_2
+  - Hero_01_Faceset_3
+  - Hero_01_Faceset_0
+  - Hero_01_Faceset_1
+  - Hero_01_Faceset_15
+  - Hero_01_Faceset_14
+  - Hero_01_Faceset_8
+  - Hero_01_Faceset_9
+  - Hero_01_Faceset_11
+  - Hero_01_Faceset_10
+  - Hero_01_Faceset_13
+  - Hero_01_Faceset_12
+  - UITemplate_tutorial_blur_tutorial
+  - UITemplate_tutorial_image_arrow_short
+  - UITemplate_tutorial_block_tutorial_spotlight
+  - UITemplate_tutorial_image_hand_tutorial
+  - UITemplate_tutorial_block_square_round_32
+  - UITemplate_tutorial_image_arrow_long
+  - UITemplate_tutorial_image_outline_tutorial
+  m_RenderDataMap: {}
+  m_Tag: UIAtlas
+  m_IsVariant: 0
