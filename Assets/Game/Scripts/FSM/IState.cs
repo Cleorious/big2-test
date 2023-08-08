@@ -1,5 +1,7 @@
 ﻿
 using System.Collections.Generic;
+using Game;
+using UnityEngine;
 
 public interface IState
 {
@@ -23,8 +25,7 @@ public class GameStart : IState
 
     public void OnEnter()
     {
-        List<PlayerData> playerDatas = levelManager.sessionPlayerDatas;
-        levelManager.RefreshHUD();
+        levelManager.SetupHUD();
 
     }
 
@@ -36,12 +37,49 @@ public class GameStart : IState
 public class DistributeDeck : IState
 {
     //!TODO: distribute cards equally among number of players
+
+    LevelManager levelManager;
+    public DistributeDeck(LevelManager levelManagerIn)
+    {
+        levelManager = levelManagerIn;
+    }
+    
     public void Tick()
     {
     }
 
     public void OnEnter()
     {
+        List<CardData> cardDatas = new List<CardData>();
+        int maxIndex = Parameter.DECK_CARD_COUNT + Parameter.DECK_CARD_START_INDEX;
+        for(int i = Parameter.DECK_CARD_START_INDEX; i < maxIndex; i++)
+        {
+            CardData cardData = new CardData();
+            cardData.val = i;
+            cardData.cardObject = levelManager.GetCardObject();
+            cardData.cardObject.SetCard(cardData);
+            cardDatas.Add(cardData);
+        }
+        
+        cardDatas.Shuffle(); //!Consider using Seeded Randomizer for actual game(testing, synchronization)
+
+        int cardCountPerPlayer = Mathf.FloorToInt((float)Parameter.DECK_CARD_COUNT / Parameter.PLAYER_COUNT);
+        Util.Log("Card Count per Player: {0}", cardCountPerPlayer);
+        int currPlayerIndex = 0;
+        for(int i = 0; i < Parameter.DECK_CARD_COUNT; i++)
+        {
+            if(i % cardCountPerPlayer == 0 && i != 0)
+            {
+                currPlayerIndex++;
+            }
+            
+            PlayerData playerData = levelManager.sessionPlayerDatas[currPlayerIndex];
+            playerData.handCardDatas.Add(cardDatas[i]);
+        }
+        
+        //!TODO: handle if starting player less than 4
+        
+        
     }
 
     public void OnExit()

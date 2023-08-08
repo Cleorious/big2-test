@@ -12,7 +12,7 @@ public class PlayerInfoUIItem : MonoBehaviour
 
     public void SetPlayerData(PlayerData playerData)
     {
-        cardCountText.SetText(playerData.handCardIndexes.Length.ToString());
+        cardCountText.SetText(playerData.handCardDatas.Count.ToString());
         SetThinking(false);
     }
 

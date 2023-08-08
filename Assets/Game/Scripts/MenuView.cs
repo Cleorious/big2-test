@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Game;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,7 +22,7 @@ public class MenuView : MonoBehaviour
         {
             int charIdx = i;
             buttonCharaUIItems[i].button.onClick.AddListener(() => OnClickCharacterButton(charIdx));
-            buttonCharaUIItems[i].buttonImage.sprite = uiManager.GetCharacterSprite(charIdx, CharacterExpression.Happy);
+            buttonCharaUIItems[i].buttonImage.sprite = gameManager.assetManager.GetCharacterSprite(charIdx, CharacterExpression.Happy);
         }
     }
 

@@ -1,8 +1,6 @@
 TODOS:
 
-Optimization
--check the card back shader to only display sprites from front
--atlas sprites to optimize draw calls
+
 
 FEATURES
 GAME LOOP WITH FSM
@@ -35,3 +33,27 @@ Reactive programming.
 ● Usage of UI framework (Unity UI or other framework is OK).
 ● Git as source control.
 ● Assets and performance optimization.
+
+Task List
+- Create card data, instantiate card objects and tie them with card data DONE
+distributeDeckState
+- arrange card objects visually for player
+starterPlayerSearchState
+- create checking for basic rules of big 2(to tie in with submitting cards)
+playerTurnState
+- interactablity for card objects, and submitting cards mechanism
+nonPlayerTurnState
+- debug to auto submit anything submittable for other player characters > test play whole gameplay loop
+- create bot FSMs with simple logic to simulate player control
+    -bot logic is to just submit whatever is submittable
+gameEndState
+-resolve winner order, show menuview to restart gameplay loop
+
+EXTRAS
+-try implement Rx for buttons in UI
+-Optimizations
+    -check the card back shader to only display sprites from front
+    -atlas sprites to optimize draw calls DONE
+- Events & Delegates
+- Coroutines
+

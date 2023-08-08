@@ -8,11 +8,11 @@ public class GameplayView : MonoBehaviour
     [SerializeField] PlayerInfoUIItem[] playerInfoUIItems;
     [SerializeField] Button submitButton;
     
-    UIManager uiManager;
+    AssetManager assetManager;
     
     public void Init(GameManager gameManager)
     {
-        uiManager = gameManager.uiManager;
+        assetManager = gameManager.assetManager;
         gameObject.SetActive(false);
     }
 
@@ -25,7 +25,8 @@ public class GameplayView : MonoBehaviour
         for(int i = 0; i < count; i++)
         {
             playerInfoUIItems[i].SetPlayerData(playerDatas[i]);
-            Sprite sprite = uiManager.GetCharacterSprite(playerDatas[i].characterIndex);
+            Sprite sprite = assetManager.GetCharacterSprite(playerDatas[i].characterIndex);
+            playerInfoUIItems[i].SetPlayerPortrait(sprite);
         }
     }
 }

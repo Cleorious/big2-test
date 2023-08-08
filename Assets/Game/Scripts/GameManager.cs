@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Game;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -22,14 +23,16 @@ public class GameManager : MonoBehaviour
     //!UI
     public UIManager uiManager;
 
+    public AssetManager assetManager;
+    
     public LevelManager levelManager;
 
     float dtBuff;
-
     float fixedTimeStep;
 
     [ReadOnly] public UserData userData;
-    
+
+
     void Start()
     {
         dtBuff = 0.0f;
