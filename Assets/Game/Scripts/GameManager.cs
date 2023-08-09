@@ -38,8 +38,6 @@ public class GameManager : MonoBehaviour
         dtBuff = 0.0f;
         fixedTimeStep = 0.016f;
         
-        levelManager = new LevelManager();
-        
         //!init managers
         levelManager.Init(this);
         
@@ -59,7 +57,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        dtBuff -= Time.deltaTime;
+        dtBuff += Time.deltaTime;
         for(; dtBuff > fixedTimeStep; dtBuff -= fixedTimeStep)
         {
             levelManager.DoUpdate(fixedTimeStep);

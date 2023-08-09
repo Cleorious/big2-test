@@ -28,9 +28,20 @@ public static class Parameter
     public const int DECK_CARD_START_INDEX = 1;
     public const int DECK_CARD_ROYAL_INDEX_START = 11;
 
-    public const int CARD_OBJECT_INITIAL_COUNT = 25;
+    public const int CARD_OBJECT_INITIAL_COUNT = 52;
 
     public static Vector3 POSITION_OUT_OF_SCREEN = new Vector3(999f, 999f, 999f);
+    
+    public static Vector3 INTRO_POS_START_BOTTOM = new Vector3(0, -10f, 0f);
+    public static Vector3 CARD_FACEDOWN_ROT = new Vector3(0f, 180f, 0f);
+    public const float INTRO_CARD_DELAY = 0.05f;
+    
+    public static float CARD_POOL_X_STACKING_OFFSET = 0.3f;
+    public static float CARD_POOL_X_DEFAULT_OFFSET = -1.7f;
+    public static float CARD_Z_OFFSET = -0.1f;
+    public static float CARD_POOL_Y_POS = -4.1f;
+
+
 }
 
 }

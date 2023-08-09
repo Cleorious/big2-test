@@ -81,14 +81,19 @@ public class StateMachine
 
    private Transition GetTransition()
    {
+      Transition ret = null;
+      
       foreach(var transition in _anyTransitions)
          if (transition.Condition())
-            return transition;
-      
-      foreach (var transition in _currentTransitions)
-         if (transition.Condition())
-            return transition;
+            ret = transition;
 
-      return null;
+      if(ret == null)
+      {
+         foreach (var transition in _currentTransitions)
+            if (transition.Condition())
+               ret = transition;
+      }
+
+      return ret;
    }
 }

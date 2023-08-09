@@ -1,4 +1,5 @@
 ﻿
+using System.Collections;
 using System.Collections.Generic;
 using Game;
 using UnityEngine;
@@ -26,7 +27,6 @@ public class GameStart : IState
     public void OnEnter()
     {
         levelManager.SetupHUD();
-
     }
 
     public void OnExit()
@@ -78,9 +78,11 @@ public class DistributeDeck : IState
         }
         
         //!TODO: handle if starting player less than 4
-        
-        
+        levelManager.DistributeCards();
+        //!TODO: need to check to ensure tick() doesn't run while running on enter function?
     }
+    
+    
 
     public void OnExit()
     {

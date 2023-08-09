@@ -53,7 +53,14 @@ public static class Util
 
         if(normalizedVal <= 10)
         {
-            ret = normalizedVal.ToString();
+            if(normalizedVal == 1)
+            {
+                ret = "A";
+            }
+            else
+            {
+                ret = normalizedVal.ToString();
+            }
         }
         else
         {

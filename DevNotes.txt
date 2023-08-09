@@ -37,7 +37,7 @@ Reactive programming.
 Task List
 - Create card data, instantiate card objects and tie them with card data DONE
 distributeDeckState
-- arrange card objects visually for player
+- arrange card objects visually for player DONE
 starterPlayerSearchState
 - create checking for basic rules of big 2(to tie in with submitting cards)
 playerTurnState
