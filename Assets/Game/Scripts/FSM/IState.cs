@@ -54,8 +54,7 @@ public class DistributeDeck : IState
         int maxIndex = Parameter.DECK_CARD_COUNT + Parameter.DECK_CARD_START_INDEX;
         for(int i = Parameter.DECK_CARD_START_INDEX; i < maxIndex; i++)
         {
-            CardData cardData = new CardData();
-            cardData.val = i;
+            CardData cardData = new CardData(i);
             cardData.cardObject = levelManager.GetCardObject();
             cardData.cardObject.SetCard(cardData);
             cardDatas.Add(cardData);

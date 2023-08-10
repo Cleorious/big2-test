@@ -81,6 +81,26 @@ public static class Util
 
         return ret;
     }
+
+    public static int GetBigTwoCardRank(int val, bool normalized = false)
+    {
+        if(!normalized)
+        {
+            val = GetNormalizedCardValue(val);
+        }
+        
+        if(val <= 1) //Adjust rank of Ace
+        {
+            val = 14;
+        }
+			
+        if(val == 2) //Increase rank of 2 so it only makes it with K
+        {
+            val = 15;
+        }
+
+        return val;
+    }
     
     public static void Shuffle<T>(this IList<T> list)  
     {  

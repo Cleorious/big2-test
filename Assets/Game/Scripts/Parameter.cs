@@ -36,12 +36,24 @@ public static class Parameter
     public static Vector3 CARD_FACEDOWN_ROT = new Vector3(0f, 180f, 0f);
     public const float INTRO_CARD_DELAY = 0.05f;
     
-    public static float CARD_POOL_X_STACKING_OFFSET = 0.3f;
-    public static float CARD_POOL_X_DEFAULT_OFFSET = -1.7f;
-    public static float CARD_Z_OFFSET = -0.1f;
-    public static float CARD_POOL_Y_POS = -4.1f;
+    public const float CARD_POOL_X_STACKING_OFFSET = 0.3f;
+    public const float CARD_POOL_X_DEFAULT_OFFSET = -1.7f;
+    public const float CARD_Z_OFFSET = -0.1f;
+    public const float CARD_POOL_Y_POS = -4.1f;
 
+    public const int CARD_DIAMOND_THREE_VAL = 3;
 
+    public static readonly Dictionary<CombinationType, int> CARDCOMBO_COMBINATION_CARD_COUNTS = new Dictionary<CombinationType, int>()
+    {
+        {CombinationType.Singles, 1},
+        {CombinationType.Doubles, 2},
+        {CombinationType.Triples, 3},
+        {CombinationType.Straight, 5},
+        {CombinationType.Flush, 5},
+        {CombinationType.StraightFlush, 5},
+        {CombinationType.FourOfAKind, 5},
+        {CombinationType.FullHouse, 5},
+    };
 }
 
 }

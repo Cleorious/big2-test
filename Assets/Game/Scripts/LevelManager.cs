@@ -12,17 +12,28 @@ public enum Suit
     Clover,
     Heart,
     Spade,
-    COUNT
+    COUNT,
+}
+
+public enum BoardState
+{
+    None,
+    Singles,
+    Doubles,
+    Triples,
+    FiveSet
 }
 
 public class PlayerData
 {
+    public int playerIndex;
     public int characterIndex;
     public List<CardData> handCardDatas;
 
-    public PlayerData()
+    public PlayerData(int playerIndexIn)
     {
         handCardDatas = new List<CardData>();
+        playerIndex = playerIndexIn;
     }
 
     // public int money;
@@ -44,6 +55,10 @@ public class LevelManager : MonoBehaviour
     public List<PlayerData> sessionPlayerDatas;
     public List<CardData> cardDatas;
     
+    //!board data
+    BoardState currBoardState;
+    List<CardData> currBoardCardDatas;
+
     public Transform rootCardObjectsPool;
     [ReadOnly, SerializeField] List<CardObject> cardObjectsPool;
 
@@ -83,14 +98,13 @@ public class LevelManager : MonoBehaviour
 
         //!NOTE: currently player count is always 4
         sessionPlayerDatas.Clear();
-        PlayerData playerData = new PlayerData();
+        PlayerData playerData = new PlayerData(0);
         playerData.characterIndex = gameManager.userData.selectedCharIndex;
         sessionPlayerDatas.Add(playerData);
         usedCharacterIndexes.Add(playerData.characterIndex);
-        int botCount = playerCount - 1;
-        for(int i = 0; i < botCount; i++)
+        for(int i = 1; i < playerCount; i++)
         {
-            PlayerData botData = new PlayerData();
+            PlayerData botData = new PlayerData(i);
             botData.characterIndex = GetUniqueCharacterIndex();
             usedCharacterIndexes.Add(botData.characterIndex);
             sessionPlayerDatas.Add(botData);
@@ -238,5 +252,51 @@ public class LevelManager : MonoBehaviour
         
             handCardDatas[index].cardObject.AnimatePoolPosition(newPos);
         }
+    }
+
+    public PlayerData SearchStarterPlayer()
+    {
+        PlayerData starterPlayer = null;
+        List<PlayerData> playerDatas = sessionPlayerDatas;
+        int count = playerDatas.Count;
+        for(int i = 0; i < count; i++)
+        {
+            List<CardData> handCardDatas = playerDatas[i].handCardDatas;
+            int handCount = handCardDatas.Count;
+            for(int j = 0; j < handCount; j++)
+            {
+                if(handCardDatas[j].val == Parameter.CARD_DIAMOND_THREE_VAL)
+                {
+                    starterPlayer = playerDatas[i];
+                    break;
+                }
+            }
+
+            if(starterPlayer != null)
+            {
+                break;
+            }
+        }
+
+        return starterPlayer;
+    }
+
+    public void GetPlayableCards(List<CardData> cardDatas)
+    {
+        // switch(currBoardState)
+        // {
+        //
+        //     case BoardState.Doubles:
+        //         break;
+        //     case BoardState.Doubles:
+        //         break;
+        //     case BoardState.Doubles:
+        //         break;
+        // }
+    }
+    
+    public void CheckPlayValidity(List<CardData> cardDatas)
+    {
+        
     }
 }

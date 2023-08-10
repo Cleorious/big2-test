@@ -56,4 +56,5 @@ EXTRAS
     -atlas sprites to optimize draw calls DONE
 - Events & Delegates
 - Coroutines
+-sort hand cards by value
 
