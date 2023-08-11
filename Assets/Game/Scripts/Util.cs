@@ -101,6 +101,22 @@ public static class Util
 
         return val;
     }
+
+    public static bool CheckStraightValidity(List<CardData> cardDatas)
+    {
+        bool ret = true;
+        int cardDatasCount = cardDatas.Count;
+        for(int i = 1; i < cardDatasCount; i++)
+        {
+            if(cardDatas[i].rank != cardDatas[i - 1].rank + 1) //card's rank should be consecutive
+            {
+                ret = false;
+                break;
+            }
+        }
+
+        return ret;
+    }
     
     public static void Shuffle<T>(this IList<T> list)  
     {  

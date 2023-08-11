@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using Game;
 
-public class DoubleCombination : CardCombination
+public class Double : CardCombination
 {
 
-	public DoubleCombination(PlayerData ownerIn, List<CardData> cardDatasIn) : base(ownerIn, cardDatasIn) {}
+	public Double(PlayerData ownerIn, List<CardData> cardDatasIn) : base(ownerIn, cardDatasIn) {}
 
 	public override CardData GetStrongestCard()
 	{

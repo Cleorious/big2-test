@@ -39,6 +39,7 @@ public class GameManager : MonoBehaviour
         fixedTimeStep = 0.016f;
         
         //!init managers
+        assetManager.Init();
         levelManager.Init(this);
         
         Load();

@@ -26,6 +26,8 @@ public class GameStart : IState
 
     public void OnEnter()
     {
+        Util.Log("Entered State:{0}", this.GetType().ToString());
+
         levelManager.SetupHUD();
     }
 
@@ -39,6 +41,7 @@ public class DistributeDeck : IState
     //!TODO: distribute cards equally among number of players
 
     LevelManager levelManager;
+    public bool distributionDone;
     public DistributeDeck(LevelManager levelManagerIn)
     {
         levelManager = levelManagerIn;
@@ -50,6 +53,8 @@ public class DistributeDeck : IState
 
     public void OnEnter()
     {
+        Util.Log("Entered State:{0}", this.GetType().ToString());
+
         List<CardData> cardDatas = new List<CardData>();
         int maxIndex = Parameter.DECK_CARD_COUNT + Parameter.DECK_CARD_START_INDEX;
         for(int i = Parameter.DECK_CARD_START_INDEX; i < maxIndex; i++)
@@ -77,8 +82,54 @@ public class DistributeDeck : IState
         }
         
         //!TODO: handle if starting player less than 4
-        levelManager.DistributeCards();
+        levelManager.StartCoroutine(DoDistributeCards());
+
+        // levelManager.DistributeCards();
         //!TODO: need to check to ensure tick() doesn't run while running on enter function?
+    }
+    
+    public IEnumerator DoDistributeCards()
+    {
+        //!TODO: animate players' cards distribution
+        List<PlayerData> sessionPlayerDatas = levelManager.sessionPlayerDatas;
+        PlayerData playerData = sessionPlayerDatas[0];
+        List<CardData> handCardDatas = playerData.handCardDatas;
+        
+        levelManager.RefreshPlayerCardPosition(playerData);
+
+        int handCount = handCardDatas.Count;
+        Vector3[] playerHandPos = new Vector3[handCount];
+        Vector3 startPos = Parameter.INTRO_POS_START_BOTTOM;
+        for(int i = 0; i < handCount; i++)
+        {
+            playerHandPos[i] = handCardDatas[i].cardObject.transform.localPosition;
+            handCardDatas[i].cardObject.transform.localPosition = startPos;
+        }
+
+        yield return null;
+        
+        for(int i = 0; i < handCount; i++)
+        {
+            handCardDatas[i].cardObject.AnimateIntroHand(playerHandPos[i], Parameter.INTRO_CARD_DELAY * i);
+        }
+        
+        //!TODO: animate bots cards too?
+        int botCount = Parameter.PLAYER_COUNT - 1;
+        for(int i = 1; i < botCount + 1; i++)
+        {
+            int playerIndex = i;
+            PlayerData botData = sessionPlayerDatas[playerIndex];
+            handCardDatas = botData.handCardDatas;
+            handCount = handCardDatas.Count;
+            for(int j = 0; j < handCount; j++)
+            {
+                handCardDatas[j].cardObject.transform.SetParent(levelManager.playerHandRefs[playerIndex]);
+                handCardDatas[j].cardObject.transform.localPosition = Vector3.zero;
+                handCardDatas[j].cardObject.transform.localRotation = Quaternion.Euler(Parameter.CARD_FACEDOWN_ROT);
+            }
+        }
+
+        distributionDone = true;
     }
     
     
@@ -92,12 +143,24 @@ public class StarterPlayerSearch : IState
 {
     //!TODO: start of game: search for player with 3 diamonds
     //!TODO: end of resolve: start turn from player with highest card/last player who played card(?)
+
+    LevelManager levelManager;
+
+    public StarterPlayerSearch(LevelManager levelManagerIn)
+    {
+        levelManager = levelManagerIn;
+    }
+    
     public void Tick()
     {
     }
 
     public void OnEnter()
     {
+        Util.Log("Entered State:{0}", this.GetType().ToString());
+        // PlayerData playerData = levelManager.SearchStarterPlayer();
+        
+
     }
 
     public void OnExit()
@@ -107,6 +170,8 @@ public class StarterPlayerSearch : IState
 
 public class PlayerTurn : IState //!TODO: imo the main game loop needs to include the number of playerturn based on the amount of players present in that game.. meaning there would be multiple player turn classes?
 {
+
+    public bool turnFinished;
     //!TODO allow player input, and allow player to submit their selected card(if possible by rules)
     public void Tick()
     {
@@ -114,6 +179,8 @@ public class PlayerTurn : IState //!TODO: imo the main game loop needs to includ
 
     public void OnEnter()
     {
+        Util.Log("Entered State:{0}", this.GetType().ToString());
+
     }
 
     public void OnExit()
@@ -131,6 +198,8 @@ public class GameEnd : IState
 
     public void OnEnter()
     {
+        Util.Log("Entered State:{0}", this.GetType().ToString());
+
     }
 
     public void OnExit()
@@ -142,6 +211,7 @@ public class NonPlayerTurn : IState //!TODO: figure out if need to separate into
 {
     //!TODO: loop through number of other bots present in the game, have them run separate fsm logic(?)
     public int currBotIndex;
+    public bool allFinished;
     
     public void Tick()
     {
@@ -149,6 +219,29 @@ public class NonPlayerTurn : IState //!TODO: figure out if need to separate into
 
     public void OnEnter()
     {
+        Util.Log("Entered State:{0}", this.GetType().ToString());
+
+    }
+
+    public void OnExit()
+    {
+    }
+}
+
+public class RoundWinnerSearch : IState //!TODO: basically bridge state to restart the round back from turn index 0
+{
+    //!TODO: loop through number of other bots present in the game, have them run separate fsm logic(?)
+    public int nextPlayerIndex;
+    public bool finished;
+    
+    public void Tick()
+    {
+    }
+
+    public void OnEnter()
+    {
+        Util.Log("Entered State:{0}", this.GetType().ToString());
+
     }
 
     public void OnExit()

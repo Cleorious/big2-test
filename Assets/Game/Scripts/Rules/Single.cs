@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using Game;
 
-public class SingleCombination : CardCombination
+public class Single : CardCombination
 {
-	public SingleCombination(PlayerData ownerIn, List<CardData> cardDatasIn) : base(ownerIn, cardDatasIn) {}
+	public Single(PlayerData ownerIn, List<CardData> cardDatasIn) : base(ownerIn, cardDatasIn) {}
 
 	public override CardData GetStrongestCard()
 	{

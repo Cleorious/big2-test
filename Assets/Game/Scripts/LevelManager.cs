@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using Game;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -64,7 +65,10 @@ public class LevelManager : MonoBehaviour
 
     bool gameViewReady;
 
-    public Coroutine distributeDeckCoroutine;
+    Coroutine distributeDeckCoroutine;
+    int currTurnPlayerIndex;
+    int roundTurnCount;
+    
 
     public void Init(GameManager gameManager)
     {
@@ -112,24 +116,58 @@ public class LevelManager : MonoBehaviour
 
         GameStart gameStartState = new GameStart(this);
         DistributeDeck distributeDeckState = new DistributeDeck(this);
-        StarterPlayerSearch starterPlayerSearchState = new StarterPlayerSearch();
+        StarterPlayerSearch starterPlayerSearchState = new StarterPlayerSearch(this);
+        RoundWinnerSearch roundWinnerSearchState = new RoundWinnerSearch();
         PlayerTurn playerTurnState = new PlayerTurn();
         NonPlayerTurn nonPlayerTurnState = new NonPlayerTurn();
         GameEnd gameEndState = new GameEnd();
         
 
         Func<bool> HUDReady() => () => gameViewReady;
-        Func<bool> DistributionDone() => () => distributeDeckCoroutine == null;
-
-        At(distributeDeckState, gameStartState, HUDReady());
-        At(starterPlayerSearchState, distributeDeckState, DistributionDone());
+        Func<bool> DistributionDone() => () => distributeDeckState.distributionDone;
+        
+        Func<bool> PlayerTurnFinishedAndHasNext() => () => playerTurnState.turnFinished && HasNextPlayer();
+        Func<bool> PlayerTurnFinished() => () => playerTurnState.turnFinished;
+        
+        Func<bool> NonPlayerTurnFinishedAndHasNext() => () => nonPlayerTurnState.allFinished && HasNextPlayer();
+        Func<bool> NonPlayerTurnFinished() => () => nonPlayerTurnState.allFinished;
+        
+        Func<bool> ShouldGoToPlayerTurn() => () => roundWinnerSearchState.finished && roundWinnerSearchState.nextPlayerIndex == 0;
+        Func<bool> ShouldGoToNonPlayerTurn() => () => roundWinnerSearchState.finished && roundWinnerSearchState.nextPlayerIndex != 0;
+        
+        At(gameStartState, distributeDeckState, HUDReady());
+        At(distributeDeckState, starterPlayerSearchState, DistributionDone());
+        
+        At(playerTurnState, nonPlayerTurnState, PlayerTurnFinishedAndHasNext());
+        At(playerTurnState, roundWinnerSearchState, PlayerTurnFinished());
+        
+        At(nonPlayerTurnState, playerTurnState, NonPlayerTurnFinishedAndHasNext());
+        At(nonPlayerTurnState, roundWinnerSearchState, NonPlayerTurnFinished());
+        
+        At(roundWinnerSearchState, playerTurnState, ShouldGoToPlayerTurn());
+        At(roundWinnerSearchState, nonPlayerTurnState, ShouldGoToNonPlayerTurn());
 
         gameLoopSm.SetState(gameStartState);
 
         levelStarted = true;
     }
 
-    void At(IState to, IState from, Func<bool> condition)
+    bool HasNextPlayer()
+    {
+        int remainingActivePlayers = 0;
+        int count = sessionPlayerDatas.Count;
+        for(int i = 0; i < count; i++)
+        {
+            if(sessionPlayerDatas[i].handCardDatas.Count > 0)
+            {
+                remainingActivePlayers++;
+            }
+        }
+
+        return roundTurnCount < remainingActivePlayers;
+    }
+
+    void At(IState from, IState to, Func<bool> condition)
     {
         gameLoopSm.AddTransition(from, to, condition);
     }
@@ -181,57 +219,12 @@ public class LevelManager : MonoBehaviour
         return ret;
     }
 
-    public void DistributeCards()
-    {
-        distributeDeckCoroutine = StartCoroutine(DoDistributeCards());
-    }
-    
-    public IEnumerator DoDistributeCards()
-    {
-        //!TODO: animate players' cards distribution
-        PlayerData playerData = sessionPlayerDatas[0];
-        List<CardData> handCardDatas = playerData.handCardDatas;
-        
-        RefreshPlayerCardPosition(playerData);
 
-        int handCount = handCardDatas.Count;
-        Vector3[] playerHandPos = new Vector3[handCount];
-        Vector3 startPos = Parameter.INTRO_POS_START_BOTTOM;
-        for(int i = 0; i < handCount; i++)
-        {
-            playerHandPos[i] = handCardDatas[i].cardObject.transform.localPosition;
-            handCardDatas[i].cardObject.transform.localPosition = startPos;
-        }
-
-        yield return null;
-        
-        for(int i = 0; i < handCount; i++)
-        {
-            handCardDatas[i].cardObject.AnimateIntroHand(playerHandPos[i], Parameter.INTRO_CARD_DELAY * i);
-        }
-        
-        //!TODO: animate bots cards too?
-        int botCount = Parameter.PLAYER_COUNT - 1;
-        for(int i = 1; i < botCount + 1; i++)
-        {
-            int playerIndex = i;
-            PlayerData botData = sessionPlayerDatas[playerIndex];
-            handCardDatas = botData.handCardDatas;
-            handCount = handCardDatas.Count;
-            for(int j = 0; j < handCount; j++)
-            {
-                handCardDatas[j].cardObject.transform.SetParent(playerHandRefs[playerIndex]);
-                handCardDatas[j].cardObject.transform.localPosition = Vector3.zero;
-                handCardDatas[j].cardObject.transform.localRotation = Quaternion.Euler(Parameter.CARD_FACEDOWN_ROT);
-            }
-        }
-
-        distributeDeckCoroutine = null;
-    }
 
     public void RefreshPlayerCardPosition(PlayerData playerData, CardData exemptedCard = null)
     {
         List<CardData> handCardDatas = playerData.handCardDatas;
+        handCardDatas.Sort(); //!TODO: ENSURE THIS IS SORTED ASCENDING
         int poolLeftCount = handCardDatas.Count;
         for(int index = 0; index < poolLeftCount; ++index)
         {
@@ -254,10 +247,12 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    public PlayerData SearchStarterPlayer()
+    public void SearchStarterPlayerAndStart()
     {
-        PlayerData starterPlayer = null;
         List<PlayerData> playerDatas = sessionPlayerDatas;
+        PlayerData starterPlayer = null;
+
+        
         int count = playerDatas.Count;
         for(int i = 0; i < count; i++)
         {
@@ -278,7 +273,15 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        return starterPlayer;
+        currTurnPlayerIndex = starterPlayer.playerIndex;
+        
+        
+    }
+
+    public int GetNextPlayerTurn()
+    {
+        return 0;
+
     }
 
     public void GetPlayableCards(List<CardData> cardDatas)
@@ -296,6 +299,16 @@ public class LevelManager : MonoBehaviour
     }
     
     public void CheckPlayValidity(List<CardData> cardDatas)
+    {
+        
+    }
+
+    public void SubmitCards()
+    {
+        
+    }
+
+    public void PassTurn()
     {
         
     }

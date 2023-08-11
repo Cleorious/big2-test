@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using Game;
 
-public class TripleCombination : CardCombination
+public class Triple : CardCombination
 {
-	public TripleCombination(PlayerData ownerIn, List<CardData> cardDatasIn) : base(ownerIn, cardDatasIn) {}
+	public Triple(PlayerData ownerIn, List<CardData> cardDatasIn) : base(ownerIn, cardDatasIn) {}
 
 	public override CardData GetStrongestCard()
 	{

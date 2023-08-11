@@ -7,13 +7,19 @@ using UnityEngine.U2D;
 
 public class AssetManager : MonoBehaviour
 {
-    [ReadOnly, SerializeField] List<Sprite> characterSprites;
-    [ReadOnly, SerializeField] List<Sprite> suitSprites;
+    List<Sprite> characterSprites;
+    List<Sprite> suitSprites;
     
     [SerializeField] CardObject cardObjectPrefab;
 
-#if UNITY_EDITOR
-    [Button]
+    public void Init()
+    {
+        //!TODO: consider using addressables/asset bundles for actual game to optimize asset caching in memory
+        LoadCharacterAssetSprites();
+        LoadCardSuitSprites();
+    }
+    
+    
     void LoadCharacterAssetSprites()
     {
         characterSprites = new List<Sprite>();
@@ -31,7 +37,6 @@ public class AssetManager : MonoBehaviour
         }
     }
     
-    [Button]
     void LoadCardSuitSprites()
     {
         suitSprites = new List<Sprite>();
@@ -44,9 +49,7 @@ public class AssetManager : MonoBehaviour
             suitSprites.Add(sprite);
         }
     }
-#endif
-    
-    //!TODO: consider using addressables/asset bundles for actual game to optimize asset caching in memory
+
     
     public Sprite GetCharacterSprite(int charIndex, CharacterExpression characterExpression = CharacterExpression.Default)
     {

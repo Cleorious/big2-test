@@ -7,13 +7,18 @@ public class GameplayView : MonoBehaviour
 {
     [SerializeField] PlayerInfoUIItem[] playerInfoUIItems;
     [SerializeField] Button submitButton;
+    [SerializeField] Button passButton;
     
     AssetManager assetManager;
+    LevelManager levelManager;
     
     public void Init(GameManager gameManager)
     {
         assetManager = gameManager.assetManager;
+        levelManager = gameManager.levelManager;
         gameObject.SetActive(false);
+        submitButton.onClick.AddListener(OnSubmitButtonPressed);
+        passButton.onClick.AddListener(OnPassButtonPressed);
     }
 
     public void SetupPlayers(List<PlayerData> playerDatas)
@@ -28,5 +33,15 @@ public class GameplayView : MonoBehaviour
             Sprite sprite = assetManager.GetCharacterSprite(playerDatas[i].characterIndex);
             playerInfoUIItems[i].SetPlayerPortrait(sprite);
         }
+    }
+
+    void OnSubmitButtonPressed()
+    {
+        levelManager.SubmitCards();
+    }
+
+    void OnPassButtonPressed()
+    {
+        levelManager.PassTurn();
     }
 }

@@ -26,7 +26,9 @@ public class CardCombination
 
 		cardDatas = cardDatasIn;
 		
-		cardDatas.Sort();
+		// cardDatas.Sort();
+		cardDatas.Sort((x, y) => y.CompareTo(x)); //!TODO: ENSURE THIS SORTING IS ASCENDING ORDER
+
 	}
 
 	public PlayerData Owner()
@@ -44,42 +46,36 @@ public class CardCombination
 		return cardDatas.Count;
 	}
 
-	public bool IsStronger(CardCombination cardCombination)
+	public bool IsStrongerPlay(CardCombination otherCardCombination)
 	{
-		if(cardCombination.Size() == 1) //Single
+		bool ret = false;
+		CombinationType combinationType = GetCombinationType();
+		CombinationType otherCombinationType = otherCardCombination.GetCombinationType();
+		bool sameCombinationType = combinationType == otherCombinationType;
+		bool isValid = IsValid() && otherCardCombination.IsValid();
+		if(isValid)
 		{
-			if(this.Size() == cardCombination.Size() && this.IsValid() && GetStrongestCard().CompareTo(cardCombination.GetStrongestCard()) == 1)
+			CardData strongestCard = GetStrongestCard();
+			CardData otherStrongestCard = otherCardCombination.GetStrongestCard();
+
+			switch(otherCombinationType)
 			{
-				return true;
+				case CombinationType.Singles:
+				case CombinationType.Doubles:
+				case CombinationType.Triples:
+					ret = sameCombinationType && strongestCard.CompareTo(otherStrongestCard) == 1;
+					break;
+				case CombinationType.Straight:
+				case CombinationType.Flush:
+				case CombinationType.FullHouse:
+				case CombinationType.FourOfAKind:
+				case CombinationType.StraightFlush:
+					ret = combinationType >= otherCombinationType && strongestCard.CompareTo(otherStrongestCard) == 1;
+					break;
 			}
 		}
-		
-		if(cardCombination.Size() == 2) //Pair
-		{
-			
-			
-			if(this.Size() == cardCombination.Size() && this.IsValid() && this.GetStrongestCard().CompareTo(cardCombination.GetStrongestCard()) == 1)
-			{
-				return true;
-			}
-		}
-		
-		if(cardCombination.Size() == 3) //Triple
-		{
-			
-			if(this.Size() == cardCombination.Size() && this.IsValid() && this.GetStrongestCard().CompareTo(cardCombination.GetStrongestCard()) == 1)
-			{
-				return true;
-			}
-		}
-		
-		
-		
-		
-		
-		
-		
-		return false;
+
+		return ret;
 	}
 
 	public virtual bool IsValid()

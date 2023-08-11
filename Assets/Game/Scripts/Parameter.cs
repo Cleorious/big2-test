@@ -37,7 +37,7 @@ public static class Parameter
     public const float INTRO_CARD_DELAY = 0.05f;
     
     public const float CARD_POOL_X_STACKING_OFFSET = 0.3f;
-    public const float CARD_POOL_X_DEFAULT_OFFSET = -1.7f;
+    public const float CARD_POOL_X_DEFAULT_OFFSET = -1.85f;
     public const float CARD_Z_OFFSET = -0.1f;
     public const float CARD_POOL_Y_POS = -4.1f;
 
