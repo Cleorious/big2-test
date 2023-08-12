@@ -39,9 +39,9 @@ Task List
 distributeDeckState
 - arrange card objects visually for player DONE
 starterPlayerSearchState
-- create checking for basic rules of big 2(to tie in with submitting cards)
+- create checking for basic rules of big 2(to tie in with submitting cards) DONE
 playerTurnState
-- interactablity for card objects, and submitting cards mechanism
+- interactablity for card objects, and submitting cards mechanism DONE
 nonPlayerTurnState
 - debug to auto submit anything submittable for other player characters > test play whole gameplay loop
 - create bot FSMs with simple logic to simulate player control

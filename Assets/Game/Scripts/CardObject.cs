@@ -4,10 +4,11 @@ using DG.Tweening;
 using Game;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class CardObject : MonoBehaviour
+public class CardObject : MonoBehaviour, IPointerDownHandler
 {
-
+    [SerializeField] Transform rootCardFront;
     [SerializeField] BoxCollider2D boxCollider2D;
     [SerializeField] TextMeshPro valBigText;
     [SerializeField] TextMeshPro valSmallText;
@@ -34,7 +35,10 @@ public class CardObject : MonoBehaviour
 
         
         suitRenderer.sprite = levelManager.assetManager.GetCardSuitSprite(cardData.val);
-        suitRenderer.color = Util.GetCardSuitColor(cardData.val);
+        Color color = Util.GetCardSuitColor(cardData.val);
+        suitRenderer.color = color;
+        valBigText.color = color;
+        valSmallText.color = color;
     }
 
     void SetAnimatingState(bool state)
@@ -71,5 +75,26 @@ public class CardObject : MonoBehaviour
             transform.DOMove(poolPos, 0.2f)
                      .OnComplete(() => SetAnimatingState(false));
         }
+    }
+
+    public void AnimatePlayCard(Vector3 boardPos)
+    {
+        if(!isAnimating)
+        {
+            SetAnimatingState(true);
+            transform.DOMove(boardPos, 0.5f)
+                     .SetEase(Ease.InOutQuad)
+                     .OnComplete(() => SetAnimatingState(false));
+        }
+    }
+
+    public void SetSelected(bool isSelected)
+    {
+        rootCardFront.transform.localPosition = isSelected ? Parameter.CARDFRONT_SELECTED_POS : Parameter.CARDFRONT_UNSELECTED_POS;
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        levelManager.OnCardPressed(cardData);
     }
 }

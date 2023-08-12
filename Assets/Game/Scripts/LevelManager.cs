@@ -16,15 +16,6 @@ public enum Suit
     COUNT,
 }
 
-public enum BoardState
-{
-    None,
-    Singles,
-    Doubles,
-    Triples,
-    FiveSet
-}
-
 public class PlayerData
 {
     public int playerIndex;
@@ -57,8 +48,7 @@ public class LevelManager : MonoBehaviour
     public List<CardData> cardDatas;
     
     //!board data
-    BoardState currBoardState;
-    List<CardData> currBoardCardDatas;
+    CardCombination currBoardCardCombination;
 
     public Transform rootCardObjectsPool;
     [ReadOnly, SerializeField] List<CardObject> cardObjectsPool;
@@ -68,7 +58,11 @@ public class LevelManager : MonoBehaviour
     Coroutine distributeDeckCoroutine;
     int currTurnPlayerIndex;
     int roundTurnCount;
-    
+    int roundCount;
+
+    List<CardData> turnSelectedCards;
+    CardCombination turnSelectedCardCombination;
+
 
     public void Init(GameManager gameManager)
     {
@@ -76,6 +70,7 @@ public class LevelManager : MonoBehaviour
         assetManager = gameManager.assetManager;
         usedCharacterIndexes = new List<int>();
         sessionPlayerDatas = new List<PlayerData>();
+        turnSelectedCards = new List<CardData>();
 
         //!pooling CardObjects
         cardObjectsPool = new List<CardObject>();
@@ -132,11 +127,14 @@ public class LevelManager : MonoBehaviour
         Func<bool> NonPlayerTurnFinishedAndHasNext() => () => nonPlayerTurnState.allFinished && HasNextPlayer();
         Func<bool> NonPlayerTurnFinished() => () => nonPlayerTurnState.allFinished;
         
-        Func<bool> ShouldGoToPlayerTurn() => () => roundWinnerSearchState.finished && roundWinnerSearchState.nextPlayerIndex == 0;
-        Func<bool> ShouldGoToNonPlayerTurn() => () => roundWinnerSearchState.finished && roundWinnerSearchState.nextPlayerIndex != 0;
+        Func<bool> ShouldGoToPlayerTurn() => () => (roundWinnerSearchState.finished || starterPlayerSearchState.finished) && roundWinnerSearchState.nextPlayerIndex == 0;
+        Func<bool> ShouldGoToNonPlayerTurn() => () => (roundWinnerSearchState.finished || starterPlayerSearchState.finished) && roundWinnerSearchState.nextPlayerIndex != 0;
         
         At(gameStartState, distributeDeckState, HUDReady());
         At(distributeDeckState, starterPlayerSearchState, DistributionDone());
+        
+        At(starterPlayerSearchState, playerTurnState, ShouldGoToPlayerTurn());
+        At(starterPlayerSearchState, nonPlayerTurnState, ShouldGoToNonPlayerTurn());
         
         At(playerTurnState, nonPlayerTurnState, PlayerTurnFinishedAndHasNext());
         At(playerTurnState, roundWinnerSearchState, PlayerTurnFinished());
@@ -186,8 +184,9 @@ public class LevelManager : MonoBehaviour
         return ret;
     }
 
-    public void SetupHUD()
+    public void PrepareGame()
     {
+        roundCount = 0;
         gameManager.uiManager.gameplayView.SetupPlayers(sessionPlayerDatas);
         gameViewReady = true;
     }
@@ -219,18 +218,27 @@ public class LevelManager : MonoBehaviour
         return ret;
     }
 
+    public void ReturnCardObject(CardObject cardObject)
+    {
+        cardObjectsPool.Add(cardObject);
+        cardObject.gameObject.SetActive(false);
+        cardObject.transform.SetParent(rootCardObjectsPool);
+    }
 
 
-    public void RefreshPlayerCardPosition(PlayerData playerData, CardData exemptedCard = null)
+
+    public void RefreshPlayerHandPositions(PlayerData playerData, CardData exemptedCard = null)
     {
         List<CardData> handCardDatas = playerData.handCardDatas;
         handCardDatas.Sort(); //!TODO: ENSURE THIS IS SORTED ASCENDING
-        int poolLeftCount = handCardDatas.Count;
-        for(int index = 0; index < poolLeftCount; ++index)
+        int handCount = handCardDatas.Count;
+        for(int i = 0; i < handCount; ++i)
         {
+            handCardDatas[i].cardObject.transform.SetParent(playerHandRefs[0]);
+
             if(exemptedCard != null)
             {
-                if(handCardDatas[index] == exemptedCard)
+                if(handCardDatas[i] == exemptedCard)
                 {
                     continue;
                 }
@@ -238,13 +246,20 @@ public class LevelManager : MonoBehaviour
         
             float xPos = 0;
             
-            xPos = (index) * Parameter.CARD_POOL_X_STACKING_OFFSET + Parameter.CARD_POOL_X_DEFAULT_OFFSET;
+            xPos = (i) * Parameter.CARD_POOL_X_STACKING_OFFSET + Parameter.CARD_POOL_X_DEFAULT_OFFSET;
         
-            float zPos = -Parameter.CARD_Z_OFFSET * (index + 1);
+            float zPos = -Parameter.CARD_Z_OFFSET * (i + 1);
             Vector3 newPos = new Vector3(xPos, Parameter.CARD_POOL_Y_POS, zPos);
         
-            handCardDatas[index].cardObject.AnimatePoolPosition(newPos);
+            handCardDatas[i].cardObject.AnimatePoolPosition(newPos);
         }
+    }
+
+    public void PrepNewRound()
+    {
+        roundCount++;
+        roundTurnCount = 0;
+        currBoardCardCombination = null;
     }
 
     public void SearchStarterPlayerAndStart()
@@ -275,7 +290,6 @@ public class LevelManager : MonoBehaviour
 
         currTurnPlayerIndex = starterPlayer.playerIndex;
         
-        
     }
 
     public int GetNextPlayerTurn()
@@ -297,15 +311,169 @@ public class LevelManager : MonoBehaviour
         //         break;
         // }
     }
-    
-    public void CheckPlayValidity(List<CardData> cardDatas)
+
+    public void OnCardPressed(CardData cardData)
     {
-        
+        //!check if state is valid
+        if(gameLoopSm.currentState is PlayerTurn)
+        {
+            //check if card is selected
+            bool isSelected;
+            if(turnSelectedCards.Contains(cardData))
+            {
+                turnSelectedCards.Remove(cardData);
+                isSelected = false;
+            }
+            else
+            {
+                turnSelectedCards.Add(cardData);
+                isSelected = true;
+            }
+
+            cardData.cardObject.SetSelected(isSelected);
+
+            turnSelectedCardCombination = CreateCardCombination(sessionPlayerDatas[0], turnSelectedCards);
+            bool validPlay = CheckPlayValidity(turnSelectedCardCombination);
+            
+            gameManager.uiManager.gameplayView.RefreshSubmitButton(validPlay);
+        }
     }
 
-    public void SubmitCards()
+    CardCombination CreateCardCombination(PlayerData owner, List<CardData> combiCardDatas)
     {
+        CardCombination ret = null;
         
+        CardCombination temp = new Single(owner, combiCardDatas);
+        if(temp.IsValid())
+        {
+            ret = temp;
+        }
+
+        if(ret == null)
+        {
+            temp = new Double(owner, combiCardDatas);
+            if(temp.IsValid())
+            {
+                ret = temp;
+            }
+        }
+        
+        if(ret == null)
+        {
+            temp = new Triple(owner, combiCardDatas);
+            if(temp.IsValid())
+            {
+                ret = temp;
+            }
+        }
+        
+        if(ret == null)
+        {
+            temp = new StraightFlush(owner, combiCardDatas);
+            if(temp.IsValid())
+            {
+                ret = temp;
+            }
+        }
+        
+        if(ret == null)
+        {
+            temp = new Straight(owner, combiCardDatas);
+            if(temp.IsValid())
+            {
+                ret = temp;
+            }
+        }
+        
+        if(ret == null)
+        {
+            temp = new Flush(owner, combiCardDatas);
+            if(temp.IsValid())
+            {
+                ret = temp;
+            }
+        }
+
+        if(ret == null)
+        {
+            temp = new FullHouse(owner, combiCardDatas);
+            if(temp.IsValid())
+            {
+                ret = temp;
+            }
+        }
+
+        if(ret == null)
+        {
+            temp = new FourOfAKind(owner, combiCardDatas);
+            if(temp.IsValid())
+            {
+                ret = temp;
+            }
+        }
+			
+        return ret;
+    }
+
+    bool CheckPlayValidity(CardCombination cardCombination)
+    {
+        bool valid = false;
+        
+        if(cardCombination != null)
+        {
+            //!compare with current cardcombination on board
+            if(currBoardCardCombination == null)
+            {
+                if(roundCount == Parameter.ROUND_STARTER)
+                {
+                    valid = cardCombination.HasSpecificCard(Parameter.CARD_DIAMOND_THREE_VAL);
+                }
+                else
+                {
+                    valid = true;
+                }
+            }
+            else
+            {
+                valid = cardCombination.IsStrongerPlay(currBoardCardCombination);
+            }
+        }
+
+        return valid;
+    }
+
+    public void SubmitCardCombination()
+    {
+        bool valid = CheckPlayValidity(turnSelectedCardCombination);
+        if(valid)
+        {
+            //TODO: possible ux improvements to show the previous played cards instead of immediately destroying it
+            //! remove last card combination
+            if(currBoardCardCombination != null)
+            {
+                List<CardData> cardsToRemove = currBoardCardCombination.GetCards();
+                int removeCount = cardsToRemove.Count;
+                for(int i = 0; i < removeCount; i++)
+                {
+                    ReturnCardObject(cardsToRemove[i].cardObject);
+                }
+            }
+
+            currBoardCardCombination = turnSelectedCardCombination;
+
+            List<CardData> cardsToPlay = currBoardCardCombination.GetCards();
+            int playCount = cardsToPlay.Count;
+            for(int i = 0; i < playCount; i++)
+            {
+                float xPos = (i) * Parameter.CARD_BOARD_X_STACKING_OFFSET + Parameter.CARD_BOARD_X_DEFAULT_OFFSET;
+        
+                float zPos = -Parameter.CARD_Z_OFFSET * (i + 1);
+                Vector3 newPos = new Vector3(xPos, Parameter.CARD_BOARD_Y_POS, zPos);
+                
+                cardsToPlay[i].cardObject.AnimatePlayCard(newPos);
+            }
+        }
+
     }
 
     public void PassTurn()

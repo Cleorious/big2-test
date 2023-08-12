@@ -38,8 +38,11 @@ public static class Parameter
     
     public const float CARD_POOL_X_STACKING_OFFSET = 0.3f;
     public const float CARD_POOL_X_DEFAULT_OFFSET = -1.85f;
+    public const float CARD_BOARD_X_STACKING_OFFSET = 0.9f;
+    public const float CARD_BOARD_X_DEFAULT_OFFSET = -1.2f;
     public const float CARD_Z_OFFSET = -0.1f;
     public const float CARD_POOL_Y_POS = -4.1f;
+    public const float CARD_BOARD_Y_POS = 0f;
 
     public const int CARD_DIAMOND_THREE_VAL = 3;
 
@@ -54,6 +57,11 @@ public static class Parameter
         {CombinationType.FourOfAKind, 5},
         {CombinationType.FullHouse, 5},
     };
+
+    public static Vector3 CARDFRONT_SELECTED_POS = new Vector3(0f, 0.3f, 0f);
+    public static Vector3 CARDFRONT_UNSELECTED_POS = Vector3.zero;
+
+    public const int ROUND_STARTER = 1;
 }
 
 }

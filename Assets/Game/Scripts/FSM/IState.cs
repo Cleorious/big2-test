@@ -28,7 +28,7 @@ public class GameStart : IState
     {
         Util.Log("Entered State:{0}", this.GetType().ToString());
 
-        levelManager.SetupHUD();
+        levelManager.PrepareGame();
     }
 
     public void OnExit()
@@ -65,7 +65,13 @@ public class DistributeDeck : IState
             cardDatas.Add(cardData);
         }
         
-        cardDatas.Shuffle(); //!Consider using Seeded Randomizer for actual game(testing, synchronization)
+        cardDatas.Shuffle(); //!Consider using Seeded Randomizer for actual game(easier testing, reproducibility, synchronization)
+        
+        //!TODO: REMOVE THIS----------------------
+        CardData diamond3 = cardDatas.Find(x => x.val == Parameter.CARD_DIAMOND_THREE_VAL);
+        cardDatas.Remove(diamond3);
+        cardDatas.Insert(0, diamond3);
+        //!TODO: REMOVE THIS----------------------
 
         int cardCountPerPlayer = Mathf.FloorToInt((float)Parameter.DECK_CARD_COUNT / Parameter.PLAYER_COUNT);
         Util.Log("Card Count per Player: {0}", cardCountPerPlayer);
@@ -95,7 +101,7 @@ public class DistributeDeck : IState
         PlayerData playerData = sessionPlayerDatas[0];
         List<CardData> handCardDatas = playerData.handCardDatas;
         
-        levelManager.RefreshPlayerCardPosition(playerData);
+        levelManager.RefreshPlayerHandPositions(playerData);
 
         int handCount = handCardDatas.Count;
         Vector3[] playerHandPos = new Vector3[handCount];
@@ -145,6 +151,7 @@ public class StarterPlayerSearch : IState
     //!TODO: end of resolve: start turn from player with highest card/last player who played card(?)
 
     LevelManager levelManager;
+    public bool finished;
 
     public StarterPlayerSearch(LevelManager levelManagerIn)
     {
@@ -159,8 +166,9 @@ public class StarterPlayerSearch : IState
     {
         Util.Log("Entered State:{0}", this.GetType().ToString());
         // PlayerData playerData = levelManager.SearchStarterPlayer();
-        
-
+        levelManager.PrepNewRound();
+        levelManager.SearchStarterPlayerAndStart();
+        finished = true;
     }
 
     public void OnExit()
@@ -171,6 +179,7 @@ public class StarterPlayerSearch : IState
 public class PlayerTurn : IState //!TODO: imo the main game loop needs to include the number of playerturn based on the amount of players present in that game.. meaning there would be multiple player turn classes?
 {
 
+    
     public bool turnFinished;
     //!TODO allow player input, and allow player to submit their selected card(if possible by rules)
     public void Tick()
@@ -185,6 +194,7 @@ public class PlayerTurn : IState //!TODO: imo the main game loop needs to includ
 
     public void OnExit()
     {
+        turnFinished = false;
     }
 }
 
@@ -225,6 +235,7 @@ public class NonPlayerTurn : IState //!TODO: figure out if need to separate into
 
     public void OnExit()
     {
+        allFinished = false;
     }
 }
 
@@ -246,6 +257,7 @@ public class RoundWinnerSearch : IState //!TODO: basically bridge state to resta
 
     public void OnExit()
     {
+        finished = false;
     }
 }
 

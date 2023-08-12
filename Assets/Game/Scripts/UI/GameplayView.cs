@@ -37,11 +37,16 @@ public class GameplayView : MonoBehaviour
 
     void OnSubmitButtonPressed()
     {
-        levelManager.SubmitCards();
+        levelManager.SubmitCardCombination();
     }
 
     void OnPassButtonPressed()
     {
         levelManager.PassTurn();
+    }
+
+    public void RefreshSubmitButton(bool interactable)
+    {
+        submitButton.interactable = interactable;
     }
 }
