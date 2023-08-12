@@ -63,6 +63,8 @@ public class LevelManager : MonoBehaviour
     List<CardData> turnSelectedCards;
     CardCombination turnSelectedCardCombination;
 
+    public event Action onCardSubmitted;
+
 
     public void Init(GameManager gameManager)
     {
@@ -113,7 +115,7 @@ public class LevelManager : MonoBehaviour
         DistributeDeck distributeDeckState = new DistributeDeck(this);
         StarterPlayerSearch starterPlayerSearchState = new StarterPlayerSearch(this);
         RoundWinnerSearch roundWinnerSearchState = new RoundWinnerSearch();
-        PlayerTurn playerTurnState = new PlayerTurn();
+        PlayerTurn playerTurnState = new PlayerTurn(this);
         NonPlayerTurn nonPlayerTurnState = new NonPlayerTurn();
         GameEnd gameEndState = new GameEnd();
         
@@ -444,6 +446,11 @@ public class LevelManager : MonoBehaviour
 
     public void SubmitCardCombination()
     {
+        StartCoroutine(DoSubmitCardCombination());
+    }
+
+    public IEnumerator DoSubmitCardCombination()
+    {
         bool valid = CheckPlayValidity(turnSelectedCardCombination);
         if(valid)
         {
@@ -470,8 +477,12 @@ public class LevelManager : MonoBehaviour
                 float zPos = -Parameter.CARD_Z_OFFSET * (i + 1);
                 Vector3 newPos = new Vector3(xPos, Parameter.CARD_BOARD_Y_POS, zPos);
                 
-                cardsToPlay[i].cardObject.AnimatePlayCard(newPos);
+                cardsToPlay[i].cardObject.AnimateSubmitCard(newPos);
             }
+
+            yield return new WaitForSeconds(Parameter.CARD_SUBMIT_DURATION);
+            
+            onCardSubmitted?.Invoke();
         }
 
     }

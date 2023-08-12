@@ -62,6 +62,8 @@ public static class Parameter
     public static Vector3 CARDFRONT_UNSELECTED_POS = Vector3.zero;
 
     public const int ROUND_STARTER = 1;
+
+    public const float CARD_SUBMIT_DURATION = 0.5f;
 }
 
 }

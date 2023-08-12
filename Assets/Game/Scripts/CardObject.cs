@@ -77,14 +77,17 @@ public class CardObject : MonoBehaviour, IPointerDownHandler
         }
     }
 
-    public void AnimatePlayCard(Vector3 boardPos)
+    public void AnimateSubmitCard(Vector3 boardPos)
     {
         if(!isAnimating)
         {
             SetAnimatingState(true);
-            transform.DOMove(boardPos, 0.5f)
-                     .SetEase(Ease.InOutQuad)
-                     .OnComplete(() => SetAnimatingState(false));
+            Sequence sequence = DOTween.Sequence();
+            sequence.Append(transform.DOMove(boardPos, Parameter.CARD_SUBMIT_DURATION)
+                                     .SetEase(Ease.InOutQuad));
+            sequence.Join(transform.DOLocalRotate(Vector3.zero, Parameter.CARD_SUBMIT_DURATION));
+            sequence.OnComplete(() => SetAnimatingState(false));
+
         }
     }
 

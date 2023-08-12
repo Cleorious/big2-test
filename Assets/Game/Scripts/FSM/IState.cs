@@ -181,6 +181,14 @@ public class PlayerTurn : IState //!TODO: imo the main game loop needs to includ
 
     
     public bool turnFinished;
+
+    LevelManager levelManager;
+
+    public PlayerTurn(LevelManager levelManagerIn)
+    {
+        levelManager = levelManagerIn;
+    }
+    
     //!TODO allow player input, and allow player to submit their selected card(if possible by rules)
     public void Tick()
     {
@@ -189,12 +197,19 @@ public class PlayerTurn : IState //!TODO: imo the main game loop needs to includ
     public void OnEnter()
     {
         Util.Log("Entered State:{0}", this.GetType().ToString());
+        levelManager.onCardSubmitted += OnCardSubmitted;
 
+    }
+
+    void OnCardSubmitted()
+    {
+        turnFinished = true;
     }
 
     public void OnExit()
     {
         turnFinished = false;
+        levelManager.onCardSubmitted -= OnCardSubmitted;
     }
 }
 
