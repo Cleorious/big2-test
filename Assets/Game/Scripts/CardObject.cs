@@ -86,6 +86,7 @@ public class CardObject : MonoBehaviour, IPointerDownHandler
             sequence.Append(transform.DOMove(boardPos, Parameter.CARD_SUBMIT_DURATION)
                                      .SetEase(Ease.InOutQuad));
             sequence.Join(transform.DOLocalRotate(Vector3.zero, Parameter.CARD_SUBMIT_DURATION));
+            sequence.Join(rootCardFront.transform.DOLocalMove(Parameter.CARDFRONT_UNSELECTED_POS, Parameter.CARD_SUBMIT_DURATION));
             sequence.OnComplete(() => SetAnimatingState(false));
 
         }

@@ -58,3 +58,6 @@ EXTRAS
 - Coroutines
 -sort hand cards by value
 
+FIX RULES:
+-round does not end until all player but one has passed
+

@@ -39,7 +39,7 @@ public static class Parameter
     public const float CARD_POOL_X_STACKING_OFFSET = 0.3f;
     public const float CARD_POOL_X_DEFAULT_OFFSET = -1.85f;
     public const float CARD_BOARD_X_STACKING_OFFSET = 0.9f;
-    public const float CARD_BOARD_X_DEFAULT_OFFSET = -1.2f;
+    public const float CARD_BOARD_X_DEFAULT_OFFSET = -1.8f;
     public const float CARD_Z_OFFSET = -0.1f;
     public const float CARD_POOL_Y_POS = -4.1f;
     public const float CARD_BOARD_Y_POS = 0f;
@@ -64,6 +64,7 @@ public static class Parameter
     public const int ROUND_STARTER = 1;
 
     public const float CARD_SUBMIT_DURATION = 0.5f;
+    public const int PLAYERDATA_WINNERORDER_STILLPLAYING = -1;
 }
 
 }

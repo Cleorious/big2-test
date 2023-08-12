@@ -25,16 +25,18 @@ public class CardCombination
 	{
 		owner = ownerIn;
 
-		cardDatas = cardDatasIn;
+		//!deep copy carddatas
+
+		cardDatas = new List<CardData>(cardDatasIn);
 		
 		// cardDatas.Sort();
 		cardDatas.Sort((x, y) => x.CompareTo(y)); //!TODO: ENSURE THIS SORTING IS ASCENDING ORDER
 		
 	}
 
-	public PlayerData Owner()
+	public PlayerData GetOwner()
 	{
-		return this.owner;
+		return owner;
 	}
 
 	public virtual CardData GetStrongestCard()

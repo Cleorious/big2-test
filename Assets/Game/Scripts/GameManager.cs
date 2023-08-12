@@ -36,7 +36,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         dtBuff = 0.0f;
-        fixedTimeStep = 0.016f;
+        fixedTimeStep = 0.016f; //!to cap update tick at 60 fps
         
         //!init managers
         assetManager.Init();
@@ -62,6 +62,12 @@ public class GameManager : MonoBehaviour
         for(; dtBuff > fixedTimeStep; dtBuff -= fixedTimeStep)
         {
             levelManager.DoUpdate(fixedTimeStep);
+        }
+        
+        //!TODO: REMOVE THIS (DEBUG PURPOSES)
+        if(Input.GetKeyUp(KeyCode.Space))
+        {
+            levelManager.DoBotPlay();
         }
     }
 
