@@ -9,14 +9,6 @@ public class Double : CardCombination
 
 	public override CardData GetStrongestCard()
 	{
-		// CardData ret = cardDatas[0];
-		// if(cardDatas[0].CompareTo(cardDatas[1]) == -1)
-		// {
-		// 	ret = cardDatas[1];
-		// }
-		//!TODO check if array sorting is working properly
-
-
 		return base.GetStrongestCard();
 	}
 

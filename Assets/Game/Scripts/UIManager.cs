@@ -18,6 +18,7 @@ public class UIManager : MonoBehaviour
 {
     public MenuView menuView;
     public GameplayView gameplayView;
+    public WinPopup winPopup;
 
     AssetManager assetManager;
 
@@ -25,5 +26,6 @@ public class UIManager : MonoBehaviour
     {
         menuView.Init(gameManagerIn);
         gameplayView.Init(gameManagerIn);
+        winPopup.Init(gameManagerIn);
     }
 }

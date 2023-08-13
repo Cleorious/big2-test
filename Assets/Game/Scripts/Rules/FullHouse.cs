@@ -11,11 +11,11 @@ public class FullHouse : CardCombination
 		CardData ret;
 		if(cardDatas[0].rank == cardDatas[2].rank) 
 		{
-			ret = cardDatas[2]; // All the sorted first 3 cards have same rank means the 3rd card is the highest - top card
+			ret = cardDatas[2]; //! All the sorted first 3 cards have same rank means the 3rd card is the highest - top card
 		}
 		else
 		{
-			ret = cardDatas[4]; // Odd 2 cards have lower rank, thus final card is the top card
+			ret = cardDatas[4]; //! Odd 2 cards have lower rank, thus final card is the top card
 		}
 
 		return ret;

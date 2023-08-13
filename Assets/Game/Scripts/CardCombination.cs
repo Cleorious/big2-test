@@ -29,7 +29,7 @@ public class CardCombination
 
 		cardDatas = new List<CardData>(cardDatasIn);
 		
-		// cardDatas.Sort();
+		
 		cardDatas.Sort((x, y) => x.CompareTo(y)); //!TODO: ENSURE THIS SORTING IS ASCENDING ORDER
 		
 	}

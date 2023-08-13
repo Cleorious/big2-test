@@ -56,6 +56,12 @@ public class GameManager : MonoBehaviour
         levelManager.StartLevel(Parameter.PLAYER_COUNT);
     }
 
+    public void ReturnToMenu()
+    {
+        uiManager.menuView.Show();
+        uiManager.gameplayView.Hide();
+    }
+
     void Update()
     {
         dtBuff += Time.deltaTime;

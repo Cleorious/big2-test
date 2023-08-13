@@ -43,9 +43,9 @@ starterPlayerSearchState
 playerTurnState
 - interactablity for card objects, and submitting cards mechanism DONE
 nonPlayerTurnState
-- debug to auto submit anything submittable for other player characters > test play whole gameplay loop
-- create bot FSMs with simple logic to simulate player control
-    -bot logic is to just submit whatever is submittable
+- debug to auto submit anything submittable for other player characters > test play whole gameplay loop DONE
+- create bot FSMs with simple logic to simulate player control DONE
+    -bot logic is to just submit whatever is submittable DONE
 gameEndState
 -resolve winner order, show menuview to restart gameplay loop
 
@@ -55,8 +55,8 @@ EXTRAS
     -check the card back shader to only display sprites from front
     -atlas sprites to optimize draw calls DONE
 - Events & Delegates
-- Coroutines
--sort hand cards by value
+- Coroutines DONE
+- sort hand cards by value DONE
 
 FIX RULES:
 -round does not end until all player but one has passed

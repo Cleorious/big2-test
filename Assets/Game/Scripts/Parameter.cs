@@ -65,6 +65,9 @@ public static class Parameter
 
     public const float CARD_SUBMIT_DURATION = 0.5f;
     public const int PLAYERDATA_WINNERORDER_STILLPLAYING = -1;
+    public const int PLAYERDATA_WINNERORDER_FIRSTWINNER = 0;
+    public const float BOT_THINKING_MIN = 0.5f;
+    public const float BOT_THINKING_MAX = 1.5f;
 }
 
 }

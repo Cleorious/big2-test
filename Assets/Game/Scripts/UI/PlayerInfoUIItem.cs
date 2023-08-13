@@ -9,11 +9,12 @@ public class PlayerInfoUIItem : MonoBehaviour
     [SerializeField] TextMeshProUGUI cardCountText;
     [SerializeField] TextMeshProUGUI stateText;
     [SerializeField] Image charImg;
+    [SerializeField] RectTransform inactiveOverlay;
 
     public void SetPlayerData(PlayerData playerData)
     {
         cardCountText.SetText(playerData.handCardDatas.Count.ToString());
-        SetThinking(false);
+        inactiveOverlay.gameObject.SetActive(playerData.hasPassed);
     }
 
     public void SetThinking(bool show)

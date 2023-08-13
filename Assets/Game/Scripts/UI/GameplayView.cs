@@ -21,9 +21,19 @@ public class GameplayView : MonoBehaviour
         passButton.onClick.AddListener(OnPassButtonPressed);
     }
 
-    public void SetupPlayers(List<PlayerData> playerDatas)
+    void Show()
     {
         gameObject.SetActive(true);
+    }
+
+    public void Hide()
+    {
+        gameObject.SetActive(false);
+    }
+
+    public void SetupPlayers(List<PlayerData> playerDatas)
+    {
+        Show();
         
         //!NOTE: player is always index 0
         int count = playerDatas.Count;
@@ -32,6 +42,18 @@ public class GameplayView : MonoBehaviour
             playerInfoUIItems[i].SetPlayerData(playerDatas[i]);
             Sprite sprite = assetManager.GetCharacterSprite(playerDatas[i].characterIndex);
             playerInfoUIItems[i].SetPlayerPortrait(sprite);
+            playerInfoUIItems[i].SetThinking(false);
+        }
+    }
+
+    public void RefreshPlayerInfos(List<PlayerData> playerDatas, int currTurnPlayerIndex)
+    {
+        int count = playerDatas.Count;
+        for(int i = 0; i < count; i++)
+        {
+            playerInfoUIItems[i].SetPlayerData(playerDatas[i]);
+            playerInfoUIItems[i].SetThinking(i == currTurnPlayerIndex);
+            playerInfoUIItems
         }
     }
 

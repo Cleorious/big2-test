@@ -6,7 +6,7 @@ using UnityEngine;
 
 public interface IState
 {
-    void Tick();
+    void Tick(float dt);
     void OnEnter();
     void OnExit();
 }
@@ -20,7 +20,7 @@ public class GameStart : IState
         levelManager = levelManagerIn;
     }
     
-    public void Tick()
+    public void Tick(float dt)
     {
     }
 
@@ -47,7 +47,7 @@ public class DistributeDeck : IState
         levelManager = levelManagerIn;
     }
     
-    public void Tick()
+    public void Tick(float dt)
     {
     }
 
@@ -90,7 +90,6 @@ public class DistributeDeck : IState
         //!TODO: handle if starting player less than 4
         levelManager.StartCoroutine(DoDistributeCards());
 
-        // levelManager.DistributeCards();
         //!TODO: need to check to ensure tick() doesn't run while running on enter function?
     }
     
@@ -160,7 +159,7 @@ public class ResolveTurn : IState
         levelManager = levelManagerIn;
     }
     
-    public void Tick()
+    public void Tick(float dt)
     {
     }
 
@@ -169,7 +168,7 @@ public class ResolveTurn : IState
         Util.Log("Entered State:{0}", this.GetType().ToString());
 
         //!TODO: check if total turn count is 0, if so, prep new round
-        if(levelManager.totalRoundTurnCount == 0)
+        if(levelManager.roundCount == 0)
         {
             levelManager.PrepareNewRound();
             SearchNextPlayer(false);
@@ -178,7 +177,7 @@ public class ResolveTurn : IState
         {
             levelManager.ResolveWinner();
 
-            bool roundEnded = levelManager.currRoundTurnCount >= levelManager.totalRoundTurnCount;
+            bool roundEnded = CheckRoundEnded();
             if(!roundEnded)
             {
                 SearchNextPlayer(false);
@@ -204,7 +203,7 @@ public class ResolveTurn : IState
         //!TODO: else if curr turn count is max turn count, resolve round, and start new round if there are still players who hasn't won
 
         levelManager.currRoundTurnCount++;
-
+        levelManager.RefreshHUD();
         finished = true;
     }
 
@@ -216,9 +215,7 @@ public class ResolveTurn : IState
         Util.Log("Exited ResolveTurn, currTurnPlayerIndex: {0}", levelManager.currTurnPlayerIndex);
 
     }
-
     
-
     void SearchNextPlayer(bool roundEnded)
     {
         List<PlayerData> playerDatas = levelManager.sessionPlayerDatas;
@@ -299,7 +296,7 @@ public class ResolveTurn : IState
         int checkCount = 0;
         int tempNextIndex = CyclePlayerIndex(nextPlayerIndex);
         PlayerData tempNextPlayer = levelManager.sessionPlayerDatas[tempNextIndex];
-        while(tempNextPlayer.winnerOrderIndex != Parameter.PLAYERDATA_WINNERORDER_STILLPLAYING)
+        while(tempNextPlayer.winnerOrderIndex != Parameter.PLAYERDATA_WINNERORDER_STILLPLAYING || tempNextPlayer.hasPassed)
         {
             if(checkCount > Parameter.PLAYER_COUNT)
             {
@@ -325,6 +322,25 @@ public class ResolveTurn : IState
 
         return playerIndex;
     }
+
+    bool CheckRoundEnded()
+    {
+        bool roundEnded = false;
+        List<PlayerData> playerDatas = levelManager.sessionPlayerDatas;
+        int count = playerDatas.Count;
+        int remainingRoundPlayers = 0;
+        for(int i = 0; i < count; i++)
+        {
+            if(playerDatas[i].winnerOrderIndex == Parameter.PLAYERDATA_WINNERORDER_STILLPLAYING && !playerDatas[i].hasPassed)
+            {
+                remainingRoundPlayers++;
+            }
+        }
+
+        roundEnded = remainingRoundPlayers <= 1;
+
+        return roundEnded;
+    }
 }
 
 public class PlayerTurn : IState //!TODO: imo the main game loop needs to include the number of playerturn based on the amount of players present in that game.. meaning there would be multiple player turn classes?
@@ -341,7 +357,7 @@ public class PlayerTurn : IState //!TODO: imo the main game loop needs to includ
     }
     
     //!TODO allow player input, and allow player to submit their selected card(if possible by rules)
-    public void Tick()
+    public void Tick(float dt)
     {
     }
 
@@ -349,6 +365,7 @@ public class PlayerTurn : IState //!TODO: imo the main game loop needs to includ
     {
         Util.Log("Entered State:{0}", this.GetType().ToString());
         levelManager.onTurnEnd += OnTurnEnd;
+        levelManager.RefreshHUD();
 
     }
 
@@ -373,7 +390,7 @@ public class GameEnd : IState
         levelManager = levelManagerIn;
     }
     
-    public void Tick()
+    public void Tick(float dt)
     {
     }
 
@@ -395,21 +412,47 @@ public class NonPlayerTurn : IState //!TODO: figure out if need to separate into
     public bool turnFinished;
     LevelManager levelManager;
 
+    float thinkingDelay;
+    float timer;
+
+    bool hasMoved = false;
+
     public NonPlayerTurn(LevelManager levelManagerIn)
     {
         levelManager = levelManagerIn;
     }
     
-    public void Tick()
+    public void Tick(float dt)
     {
+        timer += dt;
+
+        if(timer > thinkingDelay && !hasMoved)
+        {
+            DoBotPlay();
+        }
     }
 
     public void OnEnter()
     {
         Util.Log("Entered State:{0}, currTurnPlayerIndex:{1}", this.GetType().ToString(), levelManager.currTurnPlayerIndex);
         levelManager.onTurnEnd += OnTurnEnd;
-
+        timer = 0f;
+        
+        //!Show bot thinking
+        thinkingDelay = Random.Range(Parameter.BOT_THINKING_MIN, Parameter.BOT_THINKING_MAX);
+        Util.Log("Bot index:{0} is thinking..", levelManager.currTurnPlayerIndex);
+        levelManager.RefreshHUD();
     }
+
+    void DoBotPlay()
+    {
+        hasMoved = true;
+        levelManager.DoBotPlay();
+        //!Show bot thinking
+        Util.Log("Bot index:{0} is Action!", levelManager.currTurnPlayerIndex);
+    }
+    
+    
 
     void OnTurnEnd()
     {
@@ -419,6 +462,8 @@ public class NonPlayerTurn : IState //!TODO: figure out if need to separate into
     public void OnExit()
     {
         turnFinished = false;
+        hasMoved = false;
+        
         levelManager.onTurnEnd -= OnTurnEnd;
     }
 }
@@ -438,7 +483,7 @@ public class CheckTurnEnd : IState
         levelManager = levelManagerIn;
     }
     
-    public void Tick()
+    public void Tick(float dt)
     {
     }
 

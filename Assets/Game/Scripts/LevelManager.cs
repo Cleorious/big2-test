@@ -24,6 +24,7 @@ public class PlayerData
     public int characterIndex;
     public List<CardData> handCardDatas;
     public int winnerOrderIndex;
+    public bool hasPassed;
 
     public PlayerData(int playerIndexIn)
     {
@@ -31,8 +32,6 @@ public class PlayerData
         playerIndex = playerIndexIn;
         winnerOrderIndex = Parameter.PLAYERDATA_WINNERORDER_STILLPLAYING;
     }
-
-    // public int money;
 }
 
 public class LevelManager : MonoBehaviour
@@ -49,8 +48,7 @@ public class LevelManager : MonoBehaviour
     List<int> usedCharacterIndexes;
 
     public List<PlayerData> sessionPlayerDatas;
-    // public List<CardData> cardDatas;
-    
+
     //!board data
     public CardCombination currBoardCardCombination;
 
@@ -62,7 +60,6 @@ public class LevelManager : MonoBehaviour
     Coroutine distributeDeckCoroutine;
     [HideInInspector] public int currTurnPlayerIndex;
     [HideInInspector] public int currRoundTurnCount;
-    [HideInInspector] public int totalRoundTurnCount;
     [HideInInspector] public int roundCount;
     [HideInInspector] public int lastWinnerOrderIndex;
 
@@ -89,21 +86,21 @@ public class LevelManager : MonoBehaviour
             cardObject.Init(this);
             cardObjectsPool.Add(cardObject);
         }
+        
     }
 
     public void DoUpdate(float dt)
     {
         if(levelStarted)
         {
-            gameLoopSm.Tick();
+            gameLoopSm.Tick(dt);
         }
     }
 
     public void StartLevel(int playerCount)
     {
-        gameLoopSm = new StateMachine();
-
         //!NOTE: currently player count is always 4
+        usedCharacterIndexes.Clear();
         sessionPlayerDatas.Clear();
         PlayerData playerData = new PlayerData(0);
         playerData.characterIndex = gameManager.userData.selectedCharIndex;
@@ -116,40 +113,45 @@ public class LevelManager : MonoBehaviour
             usedCharacterIndexes.Add(botData.characterIndex);
             sessionPlayerDatas.Add(botData);
         }
-
-        GameStart gameStartState = new GameStart(this);
-        DistributeDeck distributeDeckState = new DistributeDeck(this);
-        ResolveTurn resolveTurnState = new ResolveTurn(this);
-        // CheckTurnEnd checkTurnEndState = new CheckTurnEnd();
-        PlayerTurn playerTurnState = new PlayerTurn(this);
-        NonPlayerTurn nonPlayerTurnState = new NonPlayerTurn(this);
-        GameEnd gameEndState = new GameEnd(this);
+        
+        if(gameLoopSm == null)
+        {
+            gameLoopSm = new StateMachine();
+            GameStart gameStartState = new GameStart(this);
+            DistributeDeck distributeDeckState = new DistributeDeck(this);
+            ResolveTurn resolveTurnState = new ResolveTurn(this);
+            PlayerTurn playerTurnState = new PlayerTurn(this);
+            NonPlayerTurn nonPlayerTurnState = new NonPlayerTurn(this);
+            GameEnd gameEndState = new GameEnd(this);
         
 
-        Func<bool> HUDReady() => () => gameViewReady;
-        Func<bool> DistributionDone() => () => distributeDeckState.distributionDone;
+            Func<bool> HUDReady() => () => gameViewReady;
+            Func<bool> DistributionDone() => () => distributeDeckState.distributionDone;
         
-        Func<bool> PlayerTurnFinished() => () => playerTurnState.turnFinished;
+            Func<bool> PlayerTurnFinished() => () => playerTurnState.turnFinished;
         
-        Func<bool> NonPlayerTurnFinished() => () => nonPlayerTurnState.turnFinished;
+            Func<bool> NonPlayerTurnFinished() => () => nonPlayerTurnState.turnFinished;
         
-        Func<bool> ShouldGoToPlayerTurn() => () => resolveTurnState.finished && !resolveTurnState.gameEnded && resolveTurnState.nextPlayerIndex == 0;
-        Func<bool> ShouldGoToNonPlayerTurn() => () => resolveTurnState.finished && !resolveTurnState.gameEnded && resolveTurnState.nextPlayerIndex > 0;
-        Func<bool> ShouldEndGame() => () => resolveTurnState.finished && resolveTurnState.gameEnded;
+            Func<bool> ShouldGoToPlayerTurn() => () => resolveTurnState.finished && !resolveTurnState.gameEnded && resolveTurnState.nextPlayerIndex == 0;
+            Func<bool> ShouldGoToNonPlayerTurn() => () => resolveTurnState.finished && !resolveTurnState.gameEnded && resolveTurnState.nextPlayerIndex > 0;
+            Func<bool> ShouldEndGame() => () => resolveTurnState.finished && resolveTurnState.gameEnded;
+            Func<bool> ShouldRestartGame() => () => levelStarted;
         
-        At(gameStartState, distributeDeckState, HUDReady());
-        At(distributeDeckState, resolveTurnState, DistributionDone());
+            At(gameStartState, distributeDeckState, HUDReady());
+            At(distributeDeckState, resolveTurnState, DistributionDone());
         
-        At(resolveTurnState, playerTurnState, ShouldGoToPlayerTurn());
-        At(resolveTurnState, nonPlayerTurnState, ShouldGoToNonPlayerTurn());
-        At(resolveTurnState, gameEndState, ShouldEndGame());
+            At(resolveTurnState, playerTurnState, ShouldGoToPlayerTurn());
+            At(resolveTurnState, nonPlayerTurnState, ShouldGoToNonPlayerTurn());
+            At(resolveTurnState, gameEndState, ShouldEndGame());
         
-        At(playerTurnState, resolveTurnState, PlayerTurnFinished());
+            At(playerTurnState, resolveTurnState, PlayerTurnFinished());
         
-        At(nonPlayerTurnState, resolveTurnState, NonPlayerTurnFinished());
-
-        gameLoopSm.SetState(gameStartState);
-
+            At(nonPlayerTurnState, resolveTurnState, NonPlayerTurnFinished());
+            At(gameEndState, gameStartState, ShouldRestartGame());
+            
+            gameLoopSm.SetState(gameStartState);
+        }
+        
         levelStarted = true;
     }
 
@@ -183,11 +185,32 @@ public class LevelManager : MonoBehaviour
     public void EndGame()
     {
         //!TODO: show ui
+        int count = sessionPlayerDatas.Count;
+        for(int i = 0; i < count; i++)
+        {
+            if(sessionPlayerDatas[i].winnerOrderIndex == Parameter.PLAYERDATA_WINNERORDER_STILLPLAYING)
+            {
+                sessionPlayerDatas[i].winnerOrderIndex = Parameter.PLAYER_COUNT - 1; //! set winner order to last
+                //!cleanup their remaining cards
+                List<CardData> cardsToRemove = sessionPlayerDatas[i].handCardDatas;
+                int removeCount = cardsToRemove.Count;
+                for(int j = 0; j < removeCount; j++)
+                {
+                    ReturnCardObject(cardsToRemove[j].cardObject);
+                }
+                break;
+            }
+        }
+        gameManager.uiManager.winPopup.Show(sessionPlayerDatas);
+        levelStarted = false;
+        CleanUpBoardCards();
     }
 
     public void RefreshHUD()
     {
         Util.Log("test");
+        GameplayView gameplayView = gameManager.uiManager.gameplayView;
+        gameplayView.RefreshPlayerInfos(sessionPlayerDatas, currTurnPlayerIndex);
     }
 
     public CardObject GetCardObject()
@@ -258,15 +281,13 @@ public class LevelManager : MonoBehaviour
             CleanUpBoardCards();
             currBoardCardCombination = null;
         }
-        totalRoundTurnCount = 0;
         int count = sessionPlayerDatas.Count;
         for(int i = 0; i < count; i++)
         {
-            if(sessionPlayerDatas[i].winnerOrderIndex == Parameter.PLAYERDATA_WINNERORDER_STILLPLAYING)
-            {
-                totalRoundTurnCount++;
-            }
+            sessionPlayerDatas[i].hasPassed = false;
         }
+        
+        RefreshHUD();
     }
 
     public void ResolveWinner()
@@ -281,26 +302,6 @@ public class LevelManager : MonoBehaviour
                 lastWinnerOrderIndex++;
             }
         }
-    }
-
-    public int GetNextPlayerTurn()
-    {
-        return 0;
-
-    }
-
-    public void GetPlayableCards(List<CardData> cardDatas)
-    {
-        // switch(currBoardState)
-        // {
-        //
-        //     case BoardState.Doubles:
-        //         break;
-        //     case BoardState.Doubles:
-        //         break;
-        //     case BoardState.Doubles:
-        //         break;
-        // }
     }
 
     public void OnCardPressed(CardData cardData)
@@ -490,6 +491,8 @@ public class LevelManager : MonoBehaviour
                           currRoundTurnCount == 1;
         if(!cannotPass)
         {
+            PlayerData playerData = sessionPlayerDatas[currTurnPlayerIndex];
+            playerData.hasPassed = true;
             onTurnEnd?.Invoke();
         }
     }
@@ -783,7 +786,7 @@ public class LevelManager : MonoBehaviour
                 }
                 else
                 {
-                    break; // Not a valid straight
+                    break; //! Not a valid straight
                 }
             }
 
@@ -806,7 +809,7 @@ public class LevelManager : MonoBehaviour
         
         foreach (KeyValuePair<int, List<CardData>> grouping in rankCardGrouping)
         {
-            if (grouping.Value.Count >= Parameter.CARDCOMBO_COMBINATION_CARD_COUNTS[CombinationType.Doubles]) // At least two cards of the same rank for a pair
+            if (grouping.Value.Count >= Parameter.CARDCOMBO_COMBINATION_CARD_COUNTS[CombinationType.Doubles]) //! At least two cards of the same rank for a pair
             {
                 foreach (var secondGrouping in rankCardGrouping)
                 {
@@ -833,7 +836,7 @@ public class LevelManager : MonoBehaviour
         List<CardCombination> cardCombinations = new List<CardCombination>();
 
         int minLength = Parameter.CARDCOMBO_COMBINATION_CARD_COUNTS[CombinationType.Flush];
-        // Extract flushes from the grouped cards
+        //! Extract flushes from the grouped cards
         foreach (KeyValuePair<Suit, List<CardData>> grouping in suitCardGrouping)
         {
             if (grouping.Value.Count >= minLength)
@@ -857,7 +860,7 @@ public class LevelManager : MonoBehaviour
                             }
                             else
                             {
-                                break; // Not a valid straight
+                                break; //! Not a valid straight
                             }
                         }
 
@@ -899,10 +902,10 @@ public class LevelManager : MonoBehaviour
     {
         List<CardCombination> cardCombinations = new List<CardCombination>();
 
-        // Extract flushes from the grouped cards
+        //! Extract four of a kinds from the grouped cards
         foreach (KeyValuePair<int, List<CardData>> grouping in rankCardGrouping)
         {
-            if (grouping.Value.Count == 4) // Four cards of the same rank
+            if (grouping.Value.Count == 4) //! Four cards of the same rank
             {
                 foreach (var secondGrouping in rankCardGrouping)
                 {
