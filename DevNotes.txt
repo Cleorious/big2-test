@@ -61,3 +61,5 @@ EXTRAS
 FIX RULES:
 -round does not end until all player but one has passed DONE
 
+BUILD:
+Build 1.0.0
