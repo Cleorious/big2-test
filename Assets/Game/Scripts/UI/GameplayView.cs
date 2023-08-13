@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Game;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -48,12 +49,18 @@ public class GameplayView : MonoBehaviour
 
     public void RefreshPlayerInfos(List<PlayerData> playerDatas, int currTurnPlayerIndex)
     {
+        PlayerData currWinningPlayer = levelManager.GetCurrentlyWinningPlayer();
+        
         int count = playerDatas.Count;
         for(int i = 0; i < count; i++)
         {
-            playerInfoUIItems[i].SetPlayerData(playerDatas[i]);
-            playerInfoUIItems[i].SetThinking(i == currTurnPlayerIndex);
-            playerInfoUIItems
+            PlayerData playerData = playerDatas[i];
+            playerInfoUIItems[i].SetPlayerData(playerData);
+            bool isThisPlayerTurn = i == currTurnPlayerIndex;
+            playerInfoUIItems[i].SetThinking(isThisPlayerTurn);
+            CharacterExpression characterExpression = isThisPlayerTurn ? CharacterExpression.Default : playerData == currWinningPlayer || playerData.winnerOrderIndex != Parameter.PLAYERDATA_WINNERORDER_STILLPLAYING ? CharacterExpression.Happy : CharacterExpression.Angry;
+            Sprite sprite = assetManager.GetCharacterSprite(playerData.characterIndex, characterExpression);
+            playerInfoUIItems[i].SetPlayerPortrait(sprite);
         }
     }
 
@@ -71,4 +78,6 @@ public class GameplayView : MonoBehaviour
     {
         submitButton.interactable = interactable;
     }
+    
+    
 }

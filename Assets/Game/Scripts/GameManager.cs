@@ -41,6 +41,7 @@ public class GameManager : MonoBehaviour
         //!init managers
         assetManager.Init();
         levelManager.Init(this);
+        SoundManager.Instance.Init(this);
         
         Load();
         
@@ -48,6 +49,7 @@ public class GameManager : MonoBehaviour
         uiManager.Init(this);
         
         uiManager.menuView.Show();
+        SoundManager.Instance.PlayBGM(BGM.BGM1, 0.1f);
     }
 
     public void StartGame(int characterIndex)
@@ -69,12 +71,13 @@ public class GameManager : MonoBehaviour
         {
             levelManager.DoUpdate(fixedTimeStep);
         }
-        
-        //!TODO: REMOVE THIS (DEBUG PURPOSES)
+
+#if UNITY_EDITOR
         if(Input.GetKeyUp(KeyCode.Space))
         {
             levelManager.DoBotPlay();
         }
+#endif
     }
 
     public void Save()

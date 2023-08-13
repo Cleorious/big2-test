@@ -66,12 +66,6 @@ public class DistributeDeck : IState
         }
         
         cardDatas.Shuffle(); //!Consider using Seeded Randomizer for actual game(easier testing, reproducibility, synchronization)
-        
-        //!TODO: REMOVE THIS----------------------
-        CardData diamond3 = cardDatas.Find(x => x.val == Parameter.CARD_DIAMOND_THREE_VAL);
-        cardDatas.Remove(diamond3);
-        cardDatas.Insert(0, diamond3);
-        //!TODO: REMOVE THIS----------------------
 
         int cardCountPerPlayer = Mathf.FloorToInt((float)Parameter.DECK_CARD_COUNT / Parameter.PLAYER_COUNT);
         Util.Log("Card Count per Player: {0}", cardCountPerPlayer);
@@ -117,6 +111,7 @@ public class DistributeDeck : IState
         {
             handCardDatas[i].cardObject.AnimateIntroHand(playerHandPos[i], Parameter.INTRO_CARD_DELAY * i);
         }
+        SoundManager.Instance.PlaySfx(SFX.CardIntro, 0.25f);
         
         //!TODO: animate bots cards too?
         int botCount = Parameter.PLAYER_COUNT - 1;
@@ -366,6 +361,7 @@ public class PlayerTurn : IState //!TODO: imo the main game loop needs to includ
         Util.Log("Entered State:{0}", this.GetType().ToString());
         levelManager.onTurnEnd += OnTurnEnd;
         levelManager.RefreshHUD();
+        SoundManager.Instance.PlaySfx(SFX.PlayerTurn, 0.25f);
 
     }
 

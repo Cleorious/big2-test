@@ -204,6 +204,7 @@ public class LevelManager : MonoBehaviour
         gameManager.uiManager.winPopup.Show(sessionPlayerDatas);
         levelStarted = false;
         CleanUpBoardCards();
+        SoundManager.Instance.PlaySfx(SFX.EndGame, 0.25f);
     }
 
     public void RefreshHUD()
@@ -439,11 +440,12 @@ public class LevelManager : MonoBehaviour
         StartCoroutine(DoSubmitCardCombination());
     }
 
-    public IEnumerator DoSubmitCardCombination()
+    IEnumerator DoSubmitCardCombination()
     {
         bool valid = CheckPlayValidity(turnSelectedCardCombination);
         if(valid)
         {
+            SoundManager.Instance.PlaySfx(SFX.GenericButton, 0.25f);
             //TODO: possible ux improvements to show the previous played cards instead of immediately destroying it
             //! remove last card combination
             CleanUpBoardCards();
@@ -462,8 +464,13 @@ public class LevelManager : MonoBehaviour
                 cardsToPlay[i].cardObject.AnimateSubmitCard(newPos);
                 owner.handCardDatas.Remove(cardsToPlay[i]);
             }
-
+            SoundManager.Instance.PlaySfx(SFX.CardFlip, 0.25f);
             yield return new WaitForSeconds(Parameter.CARD_SUBMIT_DURATION);
+
+            if(owner.handCardDatas.Count == 0)
+            {
+                SoundManager.Instance.PlaySfx(SFX.PlayerWin, 0.25f);
+            }
             
             onTurnEnd?.Invoke();
             turnSelectedCards.Clear();
@@ -494,6 +501,7 @@ public class LevelManager : MonoBehaviour
             PlayerData playerData = sessionPlayerDatas[currTurnPlayerIndex];
             playerData.hasPassed = true;
             onTurnEnd?.Invoke();
+            SoundManager.Instance.PlaySfx(SFX.PassTurn, 0.25f);
         }
     }
 
@@ -518,12 +526,29 @@ public class LevelManager : MonoBehaviour
         int count = possibleMoves.Count;
         if(count > 0)
         {
-            
-            int randIdx = Random.Range(0, count);
+            int moveIdx = 0;
 
-            turnSelectedCardCombination = possibleMoves[randIdx];
+            if(roundCount == 1 && currRoundTurnCount == 1)
+            {
+                for(int i = 0; i < count; i++)
+                {
+                    CardCombination cardCombination = possibleMoves[i];
+                    if(cardCombination.GetCombinationType() == CombinationType.Singles && cardCombination.HasSpecificCard(Parameter.CARD_DIAMOND_THREE_VAL))
+                    {
+                        moveIdx = i;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                moveIdx = Random.Range(0, count);
+            }
             
-            Util.Log("ProcessedMove, options: {0}, selectedIdx: {1}, selectedCombo: {2}", count, randIdx, turnSelectedCardCombination.GetCombinationType());
+
+            turnSelectedCardCombination = possibleMoves[moveIdx];
+            
+            Util.Log("ProcessedMove, options: {0}, selectedIdx: {1}, selectedCombo: {2}", count, moveIdx, turnSelectedCardCombination.GetCombinationType());
             SubmitCardCombination();
         }
         else
@@ -928,5 +953,23 @@ public class LevelManager : MonoBehaviour
         }
 
         return cardCombinations;
+    }
+
+    public PlayerData GetCurrentlyWinningPlayer()
+    {
+        PlayerData winningPlayer = sessionPlayerDatas[0];
+        int lowestCardCount = int.MaxValue;
+        int count = sessionPlayerDatas.Count;
+        for(int i = 0; i < count; i++)
+        {
+            PlayerData playerData = sessionPlayerDatas[i];
+            if(playerData.winnerOrderIndex == Parameter.PLAYERDATA_WINNERORDER_STILLPLAYING && playerData.handCardDatas.Count < lowestCardCount)
+            {
+                lowestCardCount = playerData.handCardDatas.Count;
+                winningPlayer = playerData;
+            }
+        }
+
+        return winningPlayer;
     }
 }

@@ -47,17 +47,17 @@ nonPlayerTurnState
 - create bot FSMs with simple logic to simulate player control DONE
     -bot logic is to just submit whatever is submittable DONE
 gameEndState
--resolve winner order, show menuview to restart gameplay loop
+-resolve winner order, show menuview to restart gameplay loop DONE
 
 EXTRAS
 -try implement Rx for buttons in UI
 -Optimizations
-    -check the card back shader to only display sprites from front
+    -check the card back shader to only display sprites from front DONE
     -atlas sprites to optimize draw calls DONE
 - Events & Delegates
 - Coroutines DONE
 - sort hand cards by value DONE
 
 FIX RULES:
--round does not end until all player but one has passed
+-round does not end until all player but one has passed DONE
 
